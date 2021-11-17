@@ -18,6 +18,27 @@ app.MapPost("/items", ([FromServices] ItemRepository items, Item item) => {
     return Results.Created($"/Items/{item.id}", item);
 });
 
+app.MapGet("/items/{id}", ([FromServices] ItemRepository items, int id) => {
+    var item = items.GetById(id);
+    return item == null ? Results.NotFound() : Results.Ok(item);
+});
+
+app.MapPut("/items/{id}", ([FromServices] ItemRepository items, int id, Item item) => {
+    if(items.GetById(id) == null) {
+        return Results.NotFound();
+    }
+    items.Update(item);
+    return Results.Ok(item);
+});
+
+app.MapDelete("/items/{id}", ([FromServices] ItemRepository items, int id) => {
+    if(items.GetById(id) == null) {
+        return Results.NotFound();
+    }
+    items.Delete(id);
+    return Results.NoContent();
+});
+
 app.MapGet("/", () => "Hello From Minimal Api");
 app.Run();
 
@@ -39,7 +60,7 @@ class ItemRepository
 
     public IEnumerable<Item> GetAll() => items.Values;
 
-    public Item GetById(int id) {
+    public Item? GetById(int id) {
       if(items.ContainsKey(id)) {
         return items[id];
       }
