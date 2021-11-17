@@ -1,7 +1,12 @@
 using System.Net;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
+
+var connectionString = builder.Configuration["ConnectionStrings:DefaultConnection"];
+builder.Services.AddDbContext<ApiDbContext>(options => 
+    options.UseSqlite(connectionString));
 
 builder.Services.AddSingleton<ItemRepository>();
 var app = builder.Build();
@@ -72,5 +77,16 @@ class ItemRepository
     public void Update(Item item) => items[item.id] = item;
 
     public void Delete(int id) => items.Remove(id);
+
+}
+
+class ApiDbContext: DbContext
+{
+    public DbSet<Item>? Items { get; set; }
+    
+    public ApiDbContext(DbContextOptions<ApiDbContext> options) : base(options)
+    {
+
+    }
 
 }
